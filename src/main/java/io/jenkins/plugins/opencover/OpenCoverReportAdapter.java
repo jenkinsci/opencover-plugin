@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class OpenCoverReportAdapter extends CoverageReportAdapter {
 
@@ -188,11 +189,12 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
             }
         }
 
-        for (String sourceLineNumber : branchStatistics.keySet()) {
+        for (Map.Entry<String, BranchInfo> entry : branchStatistics.entrySet()) {
+            String sourceLineNumber = entry.getKey();
             for (Element lineElement : lineElements) {
                 if (lineElement.getAttribute("number").equals(sourceLineNumber)) {
                     lineElement.setAttribute("branch", "true");
-                    BranchInfo branchInfo = branchStatistics.get(sourceLineNumber);
+                    BranchInfo branchInfo = entry.getValue();
                     int visitedBranches = branchInfo.getVisitedBranches();
                     int allBranches = branchInfo.getAllBranches();
                     int percentOfCoveredBranches = (int)Math.round(100.0 / allBranches * visitedBranches);
