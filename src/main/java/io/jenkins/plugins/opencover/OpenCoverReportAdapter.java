@@ -11,6 +11,7 @@ import io.jenkins.plugins.coverage.targets.CoverageResult;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
 import javax.xml.XMLConstants;
@@ -18,6 +19,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,45 +36,50 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
     @Override
     public Document convert(File source) throws CoverageException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        String FEATURE = null;
+        Document document = null;
+
         try {
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
 
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new CoverageException(e);
-        }
+            FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+            factory.setFeature(FEATURE, true);
 
-        Document document = builder.newDocument();
-        Element rootElement = document.createElement("report");
-        rootElement.setAttribute("name", "OpenCover coverage");
-        document.appendChild(rootElement);
+            FEATURE = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
+            factory.setFeature(FEATURE, false);
 
-        Document openCoverReport;
-        try {
-            openCoverReport = builder.parse(source);
-        } catch (Exception e) {
-            throw new CoverageException(e);
-        }
+            factory.setXIncludeAware(false);
+            factory.setExpandEntityReferences(false);
 
-        Element openCoverReportDocumentElement = openCoverReport.getDocumentElement();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
 
-        openCoverReportDocumentElement.normalize();
 
-        NodeList modulesList = openCoverReportDocumentElement.getElementsByTagName("Modules").item(0).getChildNodes();
+            document = builder.newDocument();
+            Element rootElement = document.createElement("report");
+            rootElement.setAttribute("name", "OpenCover coverage");
+            document.appendChild(rootElement);
 
-        for (int moduleIndex = 0; moduleIndex < modulesList.getLength(); moduleIndex++) {
-            Node module = modulesList.item(moduleIndex);
-            if (module.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
+            Document openCoverReport = builder.parse(source);
+
+            Element openCoverReportDocumentElement = openCoverReport.getDocumentElement();
+
+            openCoverReportDocumentElement.normalize();
+
+            NodeList modulesList = openCoverReportDocumentElement.getElementsByTagName("Modules").item(0).getChildNodes();
+
+            for (int moduleIndex = 0; moduleIndex < modulesList.getLength(); moduleIndex++) {
+                Node module = modulesList.item(moduleIndex);
+                if (module.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+                Element moduleElement = processModule(document, module);
+                rootElement.appendChild(moduleElement);
             }
-            Element moduleElement = processModule(document, module);
-            rootElement.appendChild(moduleElement);
+
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
+            throw new CoverageException(e);
         }
 
         return document;
