@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    OpenCover plugin
+    Publish OpenCover code coverage from builds
 </div>
