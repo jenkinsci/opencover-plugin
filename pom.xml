@@ -30,7 +30,7 @@
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>code-coverage-api</artifactId>
-            <version>1.0.13</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>

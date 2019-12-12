@@ -93,6 +93,24 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
         String moduleName = moduleElementOpenCover.getElementsByTagName("ModuleName").item(0).getTextContent();
         moduleElement.setAttribute("name", moduleName);
 
+        Node filesNode = moduleElementOpenCover.getElementsByTagName("Files").item(0);
+        NodeList listOfFiles = filesNode.getChildNodes();
+
+        HashMap<String, String> filesMap = new HashMap<>();
+
+        for (int fileIndex = 0; fileIndex < listOfFiles.getLength(); fileIndex++) {
+            Node fileNode = listOfFiles.item(fileIndex);
+            if (fileNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            NamedNodeMap fileAttributes = fileNode.getAttributes();
+
+            String fileUid = fileAttributes.getNamedItem("uid").getTextContent();
+            String fileFullPath = fileAttributes.getNamedItem("fullPath").getTextContent();
+
+            filesMap.put(fileUid, fileFullPath);
+        }
+
         Node classesNode = moduleElementOpenCover.getElementsByTagName("Classes").item(0);
         NodeList listOfClasses = classesNode.getChildNodes();
 
@@ -101,13 +119,13 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
             if (classNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
-            Element classElement = processClass(document, classNode);
+            Element classElement = processClass(document, classNode, filesMap);
             moduleElement.appendChild(classElement);
         }
         return  moduleElement;
     }
 
-    private Element processClass(Document document, Node classNode) {
+    private Element processClass(Document document, Node classNode, HashMap<String, String> filesMap) {
         Element openCoverClassElement = (Element) classNode;
         String classFullName = openCoverClassElement.getElementsByTagName("FullName").item(0).getTextContent();
 
@@ -122,17 +140,24 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
             if (methodNode.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
-            Element methodElement = processMethod(document, methodNode);
+            Element methodElement = processMethod(document, methodNode, filesMap);
             classElement.appendChild(methodElement);
         }
         return classElement;
     }
 
-    private Element processMethod(Document document, Node methodNode) {
+    private Element processMethod(Document document, Node methodNode, HashMap<String, String> filesMap) {
         Element methodElement = document.createElement("method");
         Element openCoverMethodElement = (Element) methodNode;
         String methodFullName = openCoverMethodElement.getElementsByTagName("Name").item(0).getTextContent();
         methodElement.setAttribute("name", methodFullName);
+
+        Node fireRefNode = openCoverMethodElement.getElementsByTagName("FileRef").item(0);
+
+        String fileRef = fireRefNode.getAttributes().getNamedItem("uid").getTextContent();
+        if (filesMap.containsKey(fileRef)) {
+            methodElement.setAttribute("file", filesMap.get(fileRef));
+        }
 
         ArrayList<Element> lineElements = processLineElements(document, openCoverMethodElement);
 
@@ -288,6 +313,7 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
                 case "method":
                     result = new CoverageResult(CoverageElement.get("Method"), parentResult,
                             getAttribute(current, "name", ""));
+                    result.setRelativeSourcePath(getAttribute(current, "file", null));
                     break;
                 case "line":
                     processLine(current, parentResult);
