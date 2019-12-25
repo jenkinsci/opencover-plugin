@@ -99,4 +99,40 @@ public class OpenCoverReportAdapterTest {
         CoverageResult methodCoverageResult = moduleCoverageResult.getChild("ClassLibrary.LibraryClass").getChild("System.Int32 ClassLibrary.LibraryClass::Sum(System.Int32,System.Int32)");
         Assert.assertEquals(methodCoverageResult.isSourceFileAvailable(), true);
     }
+
+    @Test
+    public void ReportWIthSkippedModules() throws Exception {
+        String opencoverReport = "opencoverwithskippedmodules.xml";
+        StringBuilder sb = new StringBuilder();
+        sb.append("node {")
+                .append("publishCoverage(");
+
+        sb.append("adapters:[");
+
+        sb.append(String.format("opencoverAdapter(path: '%s')], sourceFileResolver: sourceFiles('NEVER_STORE')", opencoverReport));
+        sb.append(")").append("}");
+
+        WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
+        FilePath workspace = j.jenkins.getWorkspaceFor(project);
+
+        Objects.requireNonNull(workspace)
+                .child(opencoverReport)
+                .copyFrom(getClass().getResourceAsStream(opencoverReport));
+
+        project.setDefinition(new CpsFlowDefinition(sb.toString(), true));
+        WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
+        Assert.assertNotNull(r);
+        j.assertBuildStatusSuccess(j.waitForCompletion(r));
+        CoverageAction coverageAction = r.getAction(CoverageAction.class);
+
+        Ratio lineCoverage = coverageAction.getResult().getCoverage(CoverageElement.LINE);
+        Assert.assertEquals(lineCoverage.toString(),"1577/1657");
+
+        Ratio branchCoverage = coverageAction.getResult().getCoverage(CoverageElement.CONDITIONAL);
+        /*
+            Would be null because older reports didn't contain the "sl" attribute
+            which we use to process lines
+        */
+        Assert.assertNull(branchCoverage);
+    }
 }

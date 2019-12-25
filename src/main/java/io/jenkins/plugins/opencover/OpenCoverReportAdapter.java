@@ -93,22 +93,25 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
         String moduleName = moduleElementOpenCover.getElementsByTagName("ModuleName").item(0).getTextContent();
         moduleElement.setAttribute("name", moduleName);
 
-        Node filesNode = moduleElementOpenCover.getElementsByTagName("Files").item(0);
-        NodeList listOfFiles = filesNode.getChildNodes();
-
         HashMap<String, String> filesMap = new HashMap<>();
 
-        for (int fileIndex = 0; fileIndex < listOfFiles.getLength(); fileIndex++) {
-            Node fileNode = listOfFiles.item(fileIndex);
-            if (fileNode.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
+        Node filesNode = moduleElementOpenCover.getElementsByTagName("Files").item(0);
+
+        if (filesNode != null) {
+            NodeList listOfFiles = filesNode.getChildNodes();
+
+            for (int fileIndex = 0; fileIndex < listOfFiles.getLength(); fileIndex++) {
+                Node fileNode = listOfFiles.item(fileIndex);
+                if (fileNode.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+                NamedNodeMap fileAttributes = fileNode.getAttributes();
+
+                String fileUid = fileAttributes.getNamedItem("uid").getTextContent();
+                String fileFullPath = fileAttributes.getNamedItem("fullPath").getTextContent();
+
+                filesMap.put(fileUid, fileFullPath);
             }
-            NamedNodeMap fileAttributes = fileNode.getAttributes();
-
-            String fileUid = fileAttributes.getNamedItem("uid").getTextContent();
-            String fileFullPath = fileAttributes.getNamedItem("fullPath").getTextContent();
-
-            filesMap.put(fileUid, fileFullPath);
         }
 
         Node classesNode = moduleElementOpenCover.getElementsByTagName("Classes").item(0);
@@ -152,11 +155,13 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
         String methodFullName = openCoverMethodElement.getElementsByTagName("Name").item(0).getTextContent();
         methodElement.setAttribute("name", methodFullName);
 
-        Node fireRefNode = openCoverMethodElement.getElementsByTagName("FileRef").item(0);
+        Node fileRefNode = openCoverMethodElement.getElementsByTagName("FileRef").item(0);
 
-        String fileRef = fireRefNode.getAttributes().getNamedItem("uid").getTextContent();
-        if (filesMap.containsKey(fileRef)) {
-            methodElement.setAttribute("file", filesMap.get(fileRef));
+        if (fileRefNode != null) {
+            String fileRef = fileRefNode.getAttributes().getNamedItem("uid").getTextContent();
+            if (filesMap.containsKey(fileRef)) {
+                methodElement.setAttribute("file", filesMap.get(fileRef));
+            }
         }
 
         ArrayList<Element> lineElements = processLineElements(document, openCoverMethodElement);
@@ -200,17 +205,25 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
 
             NamedNodeMap branchPointAttributes = branchPoint.getAttributes();
 
-            String sourceLineNumber = branchPointAttributes.getNamedItem("sl").getTextContent();
+            Node sourceLineAttribute = null;
 
-            BranchInfo branchInfo = branchStatistics.get(sourceLineNumber);
-            if (branchInfo == null) {
-                branchInfo = new BranchInfo();
-                branchStatistics.put(sourceLineNumber, branchInfo);
+            if (branchPointAttributes != null) {
+                sourceLineAttribute = branchPointAttributes.getNamedItem("sl");
             }
-            branchInfo.setAllBranches(branchInfo.getAllBranches() + 1);
-            int branchHits = Integer.parseInt(branchPointAttributes.getNamedItem("vc").getTextContent());
-            if (branchHits > 0) {
-                branchInfo.setVisitedBranches(branchInfo.getVisitedBranches() + 1);
+
+            if (sourceLineAttribute != null) {
+                String sourceLineNumber = sourceLineAttribute.getTextContent();
+
+                BranchInfo branchInfo = branchStatistics.get(sourceLineNumber);
+                if (branchInfo == null) {
+                    branchInfo = new BranchInfo();
+                    branchStatistics.put(sourceLineNumber, branchInfo);
+                }
+                branchInfo.setAllBranches(branchInfo.getAllBranches() + 1);
+                int branchHits = Integer.parseInt(branchPointAttributes.getNamedItem("vc").getTextContent());
+                if (branchHits > 0) {
+                    branchInfo.setVisitedBranches(branchInfo.getVisitedBranches() + 1);
+                }
             }
         }
 
