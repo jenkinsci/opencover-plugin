@@ -26,23 +26,22 @@ public class OpenCoverReportAdapterTest {
 
     @Test
     public void StandardReportTest() throws Exception {
-        // TODO: rename cobertura report
-        String coberturaReport = "opencover.xml";
+        String opencoverReport = "opencover.xml";
         StringBuilder sb = new StringBuilder();
         sb.append("node {")
                 .append("publishCoverage(");
 
         sb.append("adapters:[");
 
-        sb.append(String.format("opencoverAdapter(path: '%s')], sourceFileResolver: sourceFiles('NEVER_STORE')", coberturaReport));
+        sb.append(String.format("opencoverAdapter(path: '%s')], sourceFileResolver: sourceFiles('NEVER_STORE')", opencoverReport));
         sb.append(")").append("}");
 
         WorkflowJob project = j.createProject(WorkflowJob.class, "coverage-pipeline-test");
         FilePath workspace = j.jenkins.getWorkspaceFor(project);
 
         Objects.requireNonNull(workspace)
-                .child(coberturaReport)
-                .copyFrom(getClass().getResourceAsStream(coberturaReport));
+                .child(opencoverReport)
+                .copyFrom(getClass().getResourceAsStream(opencoverReport));
 
         project.setDefinition(new CpsFlowDefinition(sb.toString(), true));
         WorkflowRun r = Objects.requireNonNull(project.scheduleBuild2(0)).waitForStart();
