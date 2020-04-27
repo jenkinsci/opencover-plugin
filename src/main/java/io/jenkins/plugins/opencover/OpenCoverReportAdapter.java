@@ -14,7 +14,6 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -36,23 +35,13 @@ public final class OpenCoverReportAdapter extends CoverageReportAdapter {
 
     @Override
     public Document convert(File source) throws CoverageException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        String FEATURE = null;
+
+
         Document document = null;
 
         try {
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
 
-            FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
-            factory.setFeature(FEATURE, true);
-
-            FEATURE = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
-            factory.setFeature(FEATURE, false);
-
-            factory.setXIncludeAware(false);
-            factory.setExpandEntityReferences(false);
-
-            factory.setNamespaceAware(true);
             DocumentBuilder builder = factory.newDocumentBuilder();
 
 
