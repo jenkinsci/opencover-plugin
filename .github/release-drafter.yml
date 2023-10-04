@@ -1,6 +1,0 @@
-# from  https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.yml
-_extends: .github
-name-template: OpenCover Plugin $NEXT_PATCH_VERSION
-tag-template: opencover-$NEXT_PATCH_VERSION
-exclude-labels:
-  - skip-changelog
