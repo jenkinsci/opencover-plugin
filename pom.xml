@@ -14,7 +14,7 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <gitHubRepo>jenkinsci/opencover-plugin</gitHubRepo>
-        <jenkins.version>2.414.2</jenkins.version>
+        <jenkins.version>2.414.3</jenkins.version>
     </properties>
     <name>OpenCover Plugin</name>
     <description>Publish OpenCover code coverage from builds</description>
