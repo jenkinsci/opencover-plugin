@@ -1,6 +1,8 @@
 # OpenCover plugin
 
 ![Build](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main/badge/icon)
+[![Coverage](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main/badge/icon?status=${instructionCoverage}&subject=coverage&color=${colorInstructionCoverage})](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main)
+[![LOC](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main/badge/icon?job=test&status=${lineOfCode}&subject=line%20of%20code&color=blue)](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main)
 ![Contributors](https://img.shields.io/github/contributors/jenkinsci/opencover-plugin.svg?color=blue)
 [![GitHub release](https://img.shields.io/github/release/jenkinsci/opencover-plugin.svg?label=changelog)](https://github.com/jenkinsci/opencover-plugin/releases/latest)
 [![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/opencover.svg?color=blue)](https://plugins.jenkins.io/opencover)
