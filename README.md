@@ -1,5 +1,13 @@
 # OpenCover plugin
 
+> [!CAUTION]
+> This plugin is deprecated. User must use [coverage-plugin](https://plugins.jenkins.io/coverage/) that support the OpenCover format.
+>
+> See https://plugins.jenkins.io/code-coverage-api/ for `code-coverage-api` deprecation notice
+>
+> See https://plugins.jenkins.io/coverage/ for new `recordCoverage` step 
+
+
 ![Build](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main/badge/icon)
 [![Coverage](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main/badge/icon?status=${instructionCoverage}&subject=coverage&color=${colorInstructionCoverage})](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main)
 [![LOC](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main/badge/icon?job=test&status=${lineOfCode}&subject=line%20of%20code&color=blue)](https://ci.jenkins.io/job/Plugins/job/opencover-plugin/job/main)
