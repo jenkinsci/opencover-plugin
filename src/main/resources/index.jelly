@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Publish OpenCover code coverage from builds
+    The OpenCover plug-in reached end-of-life. OpenCover coverage has been integrated into the Coverage Plugin. Please migrate your steps to the new recordCoverage step provided by the Coverage Plugin.
 </div>
